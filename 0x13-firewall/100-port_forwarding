@@ -1,15 +1,8 @@
-# Enable NAT forwarding
-sudo sysctl -w net.ipv4.ip_forward=1
+# /etc/ufw/before.rules (modified for port forwarding)
+*nat
+:PREROUTING ACCEPT [0:0]
+-A PREROUTING -p tcp --dport 8080 -j REDIRECT --to-port 80
+COMMIT
 
-# Make the change permanent
-echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf
-
-# Add firewall rule to redirect traffic from port 8080 to 80
-sudo iptables -t nat -A PREROUTING -p tcp --dport 8080 -j REDIRECT --to-port 80
-
-# Save the firewall rules
-sudo apt install iptables-persistent -y
-sudo netfilter-persistent save
-
-# Verify forwarding rule
-sudo iptables -t nat -L -n -v
+# /etc/ufw/sysctl.conf (modified to enable IP forwarding)
+net/ipv4/ip_forward=1
