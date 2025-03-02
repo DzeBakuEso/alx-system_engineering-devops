@@ -17,3 +17,4 @@ class fix_apache_500 {
 
 # Apply the class
 include fix_apache_500
+
