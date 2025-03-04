@@ -1,18 +1,34 @@
 #!/usr/bin/env bash
-# Script to configure Nginx to redirect /redirect_me to a specific URL
+# Installs and configures Nginx to return "Hello World!" at the root URL
+# and adds a 301 redirect from /redirect_me to another page
 
-# Exit immediately if a command exits with a non-zero status
-set -e
+# Update the package list and upgrade the system
+apt-get update -y && apt-get upgrade -y
 
-# Install Nginx if not already installed
-apt-get update -y
+# Install Nginx if not installed
 apt-get install -y nginx
 
-# Define the redirection block
-REDIRECT_BLOCK="location /redirect_me {\n    return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;\n}"
+# Replace the default Nginx HTML content with "Hello World!"
+echo "Hello World!" > /var/www/html/index.html
 
-# Append the redirection block to the default configuration
-sed -i "/server_name _;/a \\$REDIRECT_BLOCK" /etc/nginx/sites-available/default
+# Ensure Nginx is listening on port 80 (default server block)
+sed -i 's/listen 80 default_server;/listen 80;/' /etc/nginx/sites-available/default
 
-# Restart Nginx service
+# Add a 301 redirect for /redirect_me to another page
+sed -i '/server_name _;/a \    location /redirect_me {\n        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;\n    }' /etc/nginx/sites-available/default
+
+# Restart Nginx without using systemctl (using service instead)
 service nginx restart
+
+# Check if Nginx is running and listening on port 80
+if ! lsof -i :80 | grep nginx; then
+    echo "Error: Nginx is not running or listening on port 80."
+    exit 1
+fi
+
+# Reload Nginx to apply changes
+service nginx reload
+
+# Output confirmation
+echo "Nginx installed and configured successfully. Visit the server's IP or localhost to see 'Hello World!'."
+echo "301 Redirect for /redirect_me has been configured."
