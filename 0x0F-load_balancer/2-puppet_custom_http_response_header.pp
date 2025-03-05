@@ -19,9 +19,8 @@ file { '/etc/nginx/conf.d/custom_http_header.conf':
   notify  => Service['nginx'], # Notify Nginx service to reload when the file changes
 }
 
-# Ensure the default nginx configuration is in place (it might already be there by default)
+# Ensure the default nginx configuration is in place
 file { '/etc/nginx/sites-available/default':
-  ensure  => file,
-  content => template('nginx/default.erb'),  # If any custom site config is needed
+  ensure  => present,  # Keep existing configuration
   notify  => Service['nginx'],
 }
